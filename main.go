@@ -44,14 +44,21 @@ func main() {
 		for i, v := range list {
 			fmt.Printf("%d: %v %v\n", i, v.Date, v.Content)
 		}
-	} else {
-		r := Record{os.Args[1], time.Now()}
-		list = append(list, r)
-
-		buf, err := json.Marshal(list)
-		panicErr(err)
-
-		_, err = file.WriteAt(buf, 0)
-		panicErr(err)
+		return
 	}
+
+	if os.Args[1] == "-d" {
+		err := os.Remove(path)
+		panicErr(err)
+		return
+	}
+
+	r := Record{os.Args[1], time.Now()}
+	list = append(list, r)
+
+	buf, err = json.Marshal(list)
+	panicErr(err)
+
+	_, err = file.WriteAt(buf, 0)
+	panicErr(err)
 }
