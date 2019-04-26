@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
+	"strconv"
 	"time"
 )
 
@@ -48,17 +49,47 @@ func main() {
 	}
 
 	if os.Args[1] == "-d" {
-		err := os.Remove(path)
-		panicErr(err)
-		return
-	}
+		if len(os.Args) > 3 {
+			startStr := os.Args[2]
+			start, err := strconv.Atoi(startStr)
+			panicErr(err)
+			endStr := os.Args[3]
+			end, err := strconv.Atoi(endStr)
+			panicErr(err)
 
-	r := Record{os.Args[1], time.Now()}
-	list = append(list, r)
+			var tmpList []Record
+			for i, v := range list {
+				if i < start || i > end {
+					tmpList = append(tmpList, v)
+				}
+			}
+			list = tmpList
+		} else if len(os.Args) > 2 {
+			indexStr := os.Args[2]
+			index, err := strconv.Atoi(indexStr)
+			panicErr(err)
+			var tmpList []Record
+			for i, v := range list {
+				if i != index {
+					tmpList = append(tmpList, v)
+				}
+			}
+			list = tmpList
+		} else {
+			err := os.Remove(path)
+			panicErr(err)
+		}
+	} else {
+		r := Record{os.Args[1], time.Now()}
+		list = append(list, r)
+	}
 
 	buf, err = json.Marshal(list)
 	panicErr(err)
 
-	_, err = file.WriteAt(buf, 0)
+	l, err := file.WriteAt(buf, 0)
+	panicErr(err)
+
+	err = file.Truncate(int64(l))
 	panicErr(err)
 }
