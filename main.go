@@ -43,7 +43,8 @@ func main() {
 
 	if os.Args[1] == "-l" {
 		for i, v := range list {
-			fmt.Printf("%d: %v %v\n", i, v.Date, v.Content)
+			nt := v.Date.Format("01-02 15:04")
+			fmt.Printf("%d:\t%v\t%v\n", i, nt, v.Content)
 		}
 		return
 	}
