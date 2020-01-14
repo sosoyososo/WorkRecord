@@ -22,10 +22,6 @@ func panicErr(err error) {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		panic("参数不够")
-	}
-
 	usr, err := user.Current()
 	panicErr(err)
 	path := usr.HomeDir + "/.workRecord-rc"
@@ -41,7 +37,7 @@ func main() {
 		panicErr(err)
 	}
 
-	if os.Args[1] == "-l" {
+	if os.Args[1] == "-l" || len(os.Args) < 2 {
 		for i, v := range list {
 			nt := v.Date.Format("01-02 15:04")
 			fmt.Printf("%d:\t%v\t%v\n", i, nt, v.Content)
