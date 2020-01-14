@@ -37,7 +37,7 @@ func main() {
 		panicErr(err)
 	}
 
-	if os.Args[1] == "-l" || len(os.Args) < 2 {
+	if len(os.Args) < 2 || os.Args[1] == "-l" {
 		for i, v := range list {
 			nt := v.Date.Format("01-02 15:04")
 			fmt.Printf("%d:\t%v\t%v\n", i, nt, v.Content)
