@@ -90,7 +90,7 @@ func handleAdd(args []string, list []Record) (bool, []Record) {
 
 func handleUpdate(args []string, list []Record) (bool, []Record) {
 	// -e index freshContent
-	if len(args) < 3 {
+	if len(args) < 4 {
 		panicErr(errors.New("command format fail, should be : '-e index freshContent'"))
 	}
 

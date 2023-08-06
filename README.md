@@ -9,3 +9,4 @@
 3. 删除所有 wr -d 
 4. 删除0-10个 wr -d 0 10
 5. 删除第0个 wr -d 0
+6. 更新第1个 wr -r 1 freshContent
