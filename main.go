@@ -9,24 +9,30 @@ import (
 	"os/user"
 	"strconv"
 	"time"
+
+	"github.com/atotto/clipboard"
 )
 
 type ActionType int
 
 const (
-	ActionTypeAdd ActionType = iota
+	ActionTypeHelp ActionType = iota
+	ActionTypeAdd
 	ActionTypeList
 	ActionTypeUpdate
 	ActionTypeDel
+	ActionTypeCopy
 	ActionTypeMax
 )
 
 var (
 	acList = map[ActionType]func([]string, []Record) (bool, []Record){
+		ActionTypeHelp:   handleHelp,
 		ActionTypeAdd:    handleAdd,
 		ActionTypeList:   handleList,
 		ActionTypeUpdate: handleUpdate,
 		ActionTypeDel:    handleDel,
+		ActionTypeCopy:   handleCopyToClipboard,
 	}
 )
 
@@ -39,6 +45,26 @@ func panicErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+func handleCopyToClipboard(args []string, list []Record) (bool, []Record) {
+	// -c index
+	if len(args) < 3 {
+		panicErr(errors.New("command format fail, should be : '-c index'"))
+	}
+	// check index
+	indexStr := args[2]
+	index, err := strconv.Atoi(indexStr)
+	panicErr(err)
+	if index < 0 || index >= len(list) {
+		panicErr(errors.New("out of index"))
+	}
+	// copy content to clipboard
+	content := list[index].Content
+	err = clipboard.WriteAll(content)
+	panicErr(err)
+	fmt.Println("Content copied to clipboard")
+	return false, list
+
 }
 
 func handleDel(args []string, list []Record) (bool, []Record) {
@@ -108,6 +134,18 @@ func handleUpdate(args []string, list []Record) (bool, []Record) {
 	return true, list
 }
 
+func handleHelp(args []string, list []Record) (bool, []Record) {
+	fmt.Println("Usage:")
+	fmt.Println("  workrecord [content]          Add new record")
+	fmt.Println("  workrecord -l                 List all records")
+	fmt.Println("  workrecord -d [index]         Delete record at index")
+	fmt.Println("  workrecord -d [start] [end]   Delete records from start to end")
+	fmt.Println("  workrecord -e [index] [text]  Update record at index")
+	fmt.Println("  workrecord -c [index]         Copy record content to clipboard")
+	fmt.Println("  workrecord -h                 Show this help")
+	return false, list
+}
+
 func main() {
 	// create new file for user or read content from file for user
 	usr, err := user.Current()
@@ -134,6 +172,10 @@ func main() {
 		acType = ActionTypeDel
 	} else if args[1] == "-e" { // 首参是-e，是更改内容
 		acType = ActionTypeUpdate
+	} else if args[1] == "-c" { // 首参是-c，是复制内容
+		acType = ActionTypeCopy
+	} else if args[1] == "-h" { // 首参是-h，是帮助
+		acType = ActionTypeHelp
 	} else { //其余情况都是为了添加内容
 		acType = ActionTypeAdd
 	}
